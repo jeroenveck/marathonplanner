@@ -19,175 +19,207 @@ const zoneColor = z => ({
   "Z1":"#f0fdf4","Z2→Z3":"#fff7ed","Z2–lage Z3":"#fff7ed",
 })[z] || "#f8fafc";
 
+// ─── ACTUAL GARMIN DATA ───────────────────────────────────────────────────────
+// Week 1 start = 22 sep 2025 (ma). Week 25 = 9–15 mrt 2026 (huidig).
+// s = sessions: {d: datum, km: afstand, p: gem. tempo mm:ss, hr: gem. hartslag}
+
+const ACTUAL_DATA = {
+  1:  { km:25.6,  lr:10.44, s:[{d:"22/9", km:5.45, p:"8:46",hr:139},{d:"24/9", km:4.19, p:"6:42",hr:143},{d:"26/9", km:5.51, p:"6:09",hr:153},{d:"28/9", km:10.44,p:"7:40",hr:142}] },
+  2:  { km:29.5,  lr:11.03, s:[{d:"29/9", km:6.02, p:"6:58",hr:136},{d:"1/10", km:6.22, p:"6:35",hr:145},{d:"3/10", km:6.18, p:"6:00",hr:158},{d:"5/10", km:11.03,p:"7:20",hr:140}] },
+  3:  { km:31.4,  lr:12.09, s:[{d:"6/10", km:6.11, p:"6:53",hr:138},{d:"8/10", km:6.73, p:"6:32",hr:147},{d:"10/10",km:6.50, p:"5:55",hr:158},{d:"12/10",km:12.09,p:"6:57",hr:141}] },
+  4:  { km:35.6,  lr:13.31, s:[{d:"13/10",km:7.68, p:"7:01",hr:138},{d:"15/10",km:7.32, p:"6:15",hr:146},{d:"17/10",km:7.29, p:"5:45",hr:156},{d:"19/10",km:13.31,p:"5:59",hr:141}] },
+  5:  { km:36.9,  lr:13.82, s:[{d:"20/10",km:7.91, p:"6:53",hr:142},{d:"22/10",km:7.92, p:"6:06",hr:148},{d:"24/10",km:7.25, p:"5:44",hr:156},{d:"26/10",km:13.82,p:"6:45",hr:141}] },
+  6:  { km:40.0,  lr:15.06, s:[{d:"27/10",km:8.32, p:"7:00",hr:140},{d:"29/10",km:8.84, p:"5:59",hr:146},{d:"31/10",km:7.75, p:"5:53",hr:152},{d:"2/11", km:15.06,p:"6:45",hr:143}] },
+  7:  { km:46.9,  lr:19.07, s:[{d:"3/11", km:9.32, p:"6:55",hr:142},{d:"5/11", km:9.86, p:"6:15",hr:148},{d:"7/11", km:8.68, p:"6:02",hr:147},{d:"9/11", km:19.07,p:"6:27",hr:142}] },
+  8:  { km:42.9,  lr:17.73, s:[{d:"10/11",km:8.25, p:"6:39",hr:143},{d:"12/11",km:9.09, p:"6:04",hr:148},{d:"14/11",km:7.87, p:"5:57",hr:151},{d:"16/11",km:17.73,p:"6:37",hr:142}] },
+  9:  { km:28.9,  lr:12.04, s:[{d:"17/11",km:5.11, p:"6:29",hr:138},{d:"19/11",km:6.54, p:"6:40",hr:141},{d:"21/11",km:5.22, p:"6:09",hr:145},{d:"23/11",km:12.04,p:"7:04",hr:139}] },
+  10: { km:37.2,  lr:14.35, s:[{d:"24/11",km:8.14, p:"7:26",hr:138},{d:"26/11",km:8.29, p:"7:41",hr:132},{d:"28/11",km:6.39, p:"6:17",hr:149},{d:"30/11",km:14.35,p:"7:40",hr:130}] },
+  11: { km:41.1,  lr:16.26, s:[{d:"1/12", km:7.58, p:"8:08",hr:131},{d:"3/12", km:9.08, p:"6:57",hr:141},{d:"5/12", km:8.19, p:"5:33",hr:152},{d:"7/12", km:16.26,p:"7:27",hr:133}] },
+  12: { km:44.7,  lr:19.50, s:[{d:"8/12", km:7.74, p:"7:48",hr:134},{d:"10/12",km:10.48,p:"6:55",hr:145},{d:"12/12",km:6.93, p:"6:07",hr:152},{d:"14/12",km:19.50,p:"5:45",hr:163}] },
+  13: { km:45.0,  lr:20.08, s:[{d:"15/12",km:6.08, p:"7:58",hr:133},{d:"17/12",km:10.55,p:"6:22",hr:140},{d:"19/12",km:8.32, p:"5:47",hr:153},{d:"21/12",km:20.08,p:"7:06",hr:141}] },
+  14: { km:49.5,  lr:22.53, s:[{d:"22/12",km:7.59, p:"7:22",hr:149},{d:"24/12",km:11.45,p:"6:32",hr:139},{d:"26/12",km:7.96, p:"5:46",hr:153},{d:"28/12",km:22.53,p:"7:25",hr:140}] },
+  15: { km:49.0,  lr:24.14, s:[{d:"29/12",km:6.10, p:"7:47",hr:127},{d:"31/12",km:10.39,p:"6:28",hr:137},{d:"2/1",  km:8.36, p:"5:55",hr:153},{d:"3/1",  km:24.14,p:"7:32",hr:143}] },
+  16: { km:54.8,  lr:26.01, s:[{d:"5/1",  km:7.62, p:"7:23",hr:143},{d:"6/1",  km:13.10,p:"7:04",hr:141},{d:"9/1",  km:8.06, p:"5:44",hr:154},{d:"11/1", km:26.01,p:"7:25",hr:148}] },
+  17: { km:57.5,  lr:27.01, s:[{d:"12/1", km:6.40, p:"8:12",hr:131},{d:"14/1", km:12.40,p:"6:17",hr:142},{d:"16/1", km:11.69,p:"5:53",hr:150},{d:"18/1", km:27.01,p:"7:18",hr:150}] },
+  18: { km:46.2,  lr:26.09, s:[{d:"19/1", km:7.06, p:"7:32",hr:134},{d:"21/1", km:13.03,p:"6:02",hr:158},{d:"24/1", km:26.09,p:"7:07",hr:145}] },
+  19: { km:29.4,  lr:14.30, s:[{d:"27/1", km:8.31, p:"7:48",hr:132},{d:"29/1", km:6.82, p:"8:26",hr:137},{d:"31/1", km:14.30,p:"6:47",hr:133}] },
+  20: { km:35.3,  lr:17.12, s:[{d:"3/2",  km:10.05,p:"6:57",hr:136},{d:"5/2",  km:8.16, p:"7:26",hr:136},{d:"7/2",  km:17.12,p:"6:47",hr:149}] },
+  21: { km:37.0,  lr:18.04, s:[{d:"10/2", km:10.36,p:"5:39",hr:147},{d:"12/2", km:8.55, p:"7:34",hr:139},{d:"14/2", km:18.04,p:"7:00",hr:141}] },
+  22: { km:41.6,  lr:20.02, s:[{d:"17/2", km:13.08,p:"5:36",hr:164},{d:"19/2", km:8.48, p:"8:18",hr:132},{d:"21/2", km:20.02,p:"7:30",hr:134}] },
+  23: { km:43.9,  lr:22.30, s:[{d:"24/2", km:13.05,p:"6:21",hr:143},{d:"26/2", km:8.60, p:"6:48",hr:139},{d:"28/2", km:22.30,p:"7:10",hr:141}] },
+  24: { km:57.9,  lr:24.83, s:[{d:"3/3",  km:13.49,p:"6:49",hr:138},{d:"5/3",  km:8.35, p:"7:01",hr:135},{d:"7/3",  km:24.83,p:"6:57",hr:158},{d:"8/3",  km:11.26,p:"6:41",hr:135}] },
+  25: { km:48.5,  lr:25.83, s:[{d:"10/3", km:14.11,p:"6:15",hr:144},{d:"12/3", km:8.52, p:"6:45",hr:137},{d:"14/3", km:25.83,p:"6:51",hr:139}] },
+};
+
 // ─── ALL 34 WEEKS ────────────────────────────────────────────────────────────
 
 const ALL_WEEKS = [
   { gw:1,  fase:"Basis",  fw:1,  label:"Basisopbouw start",   type:"build", totalKm:20,
     sessions:[{dag:"Ma",type:"Easy run",dist:"5 km",    zone:"Zone 2",km:5},
               {dag:"Wo",type:"Tempo",   dist:"20 min",  zone:"Zone 3",km:null},
-              {dag:"Vr",type:"Interval",dist:"6×400m",  zone:"Zone 4",km:null},
+              {dag:"Vr",type:"Interval",dist:"6x400m",  zone:"Zone 4",km:null},
               {dag:"Zo",type:"Long run",dist:"8 km",    zone:"Zone 2",km:8}]},
   { gw:2,  fase:"Basis",  fw:2,  label:"Volume opbouwen",     type:"build", totalKm:23,
     sessions:[{dag:"Ma",type:"Easy run",dist:"6 km",    zone:"Zone 2",km:6},
               {dag:"Wo",type:"Tempo",   dist:"25 min",  zone:"Zone 3",km:null},
-              {dag:"Vr",type:"Interval",dist:"6×500m",  zone:"Zone 4",km:null},
+              {dag:"Vr",type:"Interval",dist:"6x500m",  zone:"Zone 4",km:null},
               {dag:"Zo",type:"Long run",dist:"9 km",    zone:"Zone 2",km:9}]},
   { gw:3,  fase:"Basis",  fw:3,  label:"Tempoprikkel",        type:"build", totalKm:25,
     sessions:[{dag:"Ma",type:"Easy run",dist:"6 km",    zone:"Zone 2",km:6},
               {dag:"Wo",type:"Tempo",   dist:"30 min",  zone:"Zone 3",km:null},
-              {dag:"Vr",type:"Interval",dist:"7×400m",  zone:"Zone 4",km:null},
+              {dag:"Vr",type:"Interval",dist:"7x400m",  zone:"Zone 4",km:null},
               {dag:"Zo",type:"Long run",dist:"10 km",   zone:"Zone 2",km:10}]},
   { gw:4,  fase:"Basis",  fw:4,  label:"Volume doortrekken",  type:"build", totalKm:28,
     sessions:[{dag:"Ma",type:"Easy run",dist:"7 km",    zone:"Zone 2",km:7},
               {dag:"Wo",type:"Tempo",   dist:"30 min",  zone:"Zone 3",km:null},
-              {dag:"Vr",type:"Interval",dist:"8×400m",  zone:"Zone 4",km:null},
+              {dag:"Vr",type:"Interval",dist:"8x400m",  zone:"Zone 4",km:null},
               {dag:"Zo",type:"Long run",dist:"11 km",   zone:"Zone 2",km:11}]},
   { gw:5,  fase:"Basis",  fw:5,  label:"Interval uitbreiden", type:"build", totalKm:30,
     sessions:[{dag:"Ma",type:"Easy run",dist:"7 km",    zone:"Zone 2",km:7},
               {dag:"Wo",type:"Tempo",   dist:"35 min",  zone:"Zone 3",km:null},
-              {dag:"Vr",type:"Interval",dist:"6×600m",  zone:"Zone 4",km:null},
+              {dag:"Vr",type:"Interval",dist:"6x600m",  zone:"Zone 4",km:null},
               {dag:"Zo",type:"Long run",dist:"12 km",   zone:"Zone 2",km:12}]},
   { gw:6,  fase:"Basis",  fw:6,  label:"Lange duur groeit",   type:"build", totalKm:32,
     sessions:[{dag:"Ma",type:"Easy run",dist:"7 km",    zone:"Zone 2",km:7},
               {dag:"Wo",type:"Tempo",   dist:"35 min",  zone:"Zone 3",km:null},
-              {dag:"Vr",type:"Interval",dist:"7×500m",  zone:"Zone 4",km:null},
+              {dag:"Vr",type:"Interval",dist:"7x500m",  zone:"Zone 4",km:null},
               {dag:"Zo",type:"Long run",dist:"13 km",   zone:"Zone 2",km:13}]},
   { gw:7,  fase:"Basis",  fw:7,  label:"Oplopende intensiteit",type:"build", totalKm:34,
     sessions:[{dag:"Ma",type:"Easy run",dist:"7 km",    zone:"Zone 2",km:7},
               {dag:"Wo",type:"Tempo",   dist:"40 min",  zone:"Zone 3",km:null},
-              {dag:"Vr",type:"Interval",dist:"6×800m",  zone:"Zone 4",km:null},
+              {dag:"Vr",type:"Interval",dist:"6x800m",  zone:"Zone 4",km:null},
               {dag:"Zo",type:"Long run",dist:"14 km",   zone:"Zone 2",km:14}]},
   { gw:8,  fase:"Basis",  fw:8,  label:"Basisblok afsluiting", type:"build", totalKm:36,
     sessions:[{dag:"Ma",type:"Easy run",dist:"7 km",    zone:"Zone 2",km:7},
               {dag:"Wo",type:"Tempo",   dist:"40 min",  zone:"Zone 3",km:null},
-              {dag:"Vr",type:"Interval",dist:"8×500m",  zone:"Zone 4",km:null},
+              {dag:"Vr",type:"Interval",dist:"8x500m",  zone:"Zone 4",km:null},
               {dag:"Zo",type:"Long run",dist:"15 km",   zone:"Zone 2",km:15}]},
   { gw:9,  fase:"Fundering", fw:1,  label:"Aerobe basis",       type:"build", totalKm:28,
-    sessions:[{dag:"Ma",type:"Easy run",  dist:"5 km",          zone:"Z1–2",  km:5},
-              {dag:"Wo",type:"Steady run",dist:"6 km",          zone:"Z2",    km:6},
-              {dag:"Vr",type:"Interval",  dist:"4×400m",        zone:"Z4",    km:null},
-              {dag:"Zo",type:"Long run",  dist:"12 km",         zone:"Z2",    km:12}]},
+    sessions:[{dag:"Ma",type:"Easy run",  dist:"5 km",    zone:"Z1-2",  km:5},
+              {dag:"Wo",type:"Steady run",dist:"6 km",    zone:"Z2",    km:6},
+              {dag:"Vr",type:"Interval",  dist:"4x400m",  zone:"Z4",    km:null},
+              {dag:"Zo",type:"Long run",  dist:"12 km",   zone:"Z2",    km:12}]},
   { gw:10, fase:"Fundering", fw:2,  label:"Tempo introductie",  type:"build", totalKm:34,
-    sessions:[{dag:"Ma",type:"Easy run",  dist:"6 km",          zone:"Z1–2",  km:6},
+    sessions:[{dag:"Ma",type:"Easy run",  dist:"6 km",          zone:"Z1-2",  km:6},
               {dag:"Wo",type:"Tempo",     dist:"8 km (3 Z3)",   zone:"Z3",    km:8},
-              {dag:"Vr",type:"Interval",  dist:"6×500m",        zone:"Z4–5",  km:null},
+              {dag:"Vr",type:"Interval",  dist:"6x500m",        zone:"Z4-5",  km:null},
               {dag:"Zo",type:"Long run",  dist:"14 km",         zone:"Z2",    km:14}]},
   { gw:11, fase:"Fundering", fw:3,  label:"Herstelweek",        type:"rest",  totalKm:37,
-    sessions:[{dag:"Ma",type:"Recovery",  dist:"6 km",          zone:"Z1–2",  km:6},
-              {dag:"Wo",type:"Tempo",     dist:"9 km (2×2 Z3)", zone:"Z3",    km:9},
-              {dag:"Vr",type:"Interval",  dist:"7×600m",        zone:"Z4",    km:null},
-              {dag:"Zo",type:"Long run",  dist:"16 km",         zone:"Z2–3",  km:16}]},
+    sessions:[{dag:"Ma",type:"Recovery",  dist:"6 km",          zone:"Z1-2",  km:6},
+              {dag:"Wo",type:"Tempo",     dist:"9 km (2x2 Z3)", zone:"Z3",    km:9},
+              {dag:"Vr",type:"Interval",  dist:"7x600m",        zone:"Z4",    km:null},
+              {dag:"Zo",type:"Long run",  dist:"16 km",         zone:"Z2-3",  km:16}]},
   { gw:12, fase:"Fundering", fw:4,  label:"Volume opbouwen",    type:"build", totalKm:40,
-    sessions:[{dag:"Ma",type:"Easy",      dist:"6 km",          zone:"Z1–2",  km:6},
+    sessions:[{dag:"Ma",type:"Easy",      dist:"6 km",          zone:"Z1-2",  km:6},
               {dag:"Wo",type:"Tempo",     dist:"10 km (4 Z3)",  zone:"Z3",    km:10},
-              {dag:"Vr",type:"Interval",  dist:"8×400m",        zone:"Z4–5",  km:null},
+              {dag:"Vr",type:"Interval",  dist:"8x400m",        zone:"Z4-5",  km:null},
               {dag:"Zo",type:"Long run",  dist:"18 km",         zone:"Z2",    km:18}]},
   { gw:13, fase:"Fundering", fw:5,  label:"Duurverlenging",     type:"build", totalKm:42,
-    sessions:[{dag:"Ma",type:"Easy",      dist:"6 km",          zone:"Z1–2",  km:6},
-              {dag:"Wo",type:"Tempo",     dist:"10 km (2×3)",   zone:"Z3",    km:10},
-              {dag:"Vr",type:"Interval",  dist:"6×800m",        zone:"Z4",    km:null},
-              {dag:"Zo",type:"Long run",  dist:"20 km",         zone:"Z2–3",  km:20}]},
+    sessions:[{dag:"Ma",type:"Easy",      dist:"6 km",          zone:"Z1-2",  km:6},
+              {dag:"Wo",type:"Tempo",     dist:"10 km (2x3)",   zone:"Z3",    km:10},
+              {dag:"Vr",type:"Interval",  dist:"6x800m",        zone:"Z4",    km:null},
+              {dag:"Zo",type:"Long run",  dist:"20 km",         zone:"Z2-3",  km:20}]},
   { gw:14, fase:"Fundering", fw:6,  label:"Lang en stabiel",    type:"build", totalKm:46,
-    sessions:[{dag:"Ma",type:"Easy",      dist:"7 km",          zone:"Z1–2",  km:7},
+    sessions:[{dag:"Ma",type:"Easy",      dist:"7 km",          zone:"Z1-2",  km:7},
               {dag:"Wo",type:"Tempo",     dist:"11 km (5 Z3)",  zone:"Z3",    km:11},
-              {dag:"Vr",type:"Interval",  dist:"5×1 km",        zone:"Z4",    km:null},
-              {dag:"Zo",type:"Long run",  dist:"22 km",         zone:"Z2–3",  km:22}]},
+              {dag:"Vr",type:"Interval",  dist:"5x1 km",        zone:"Z4",    km:null},
+              {dag:"Zo",type:"Long run",  dist:"22 km",         zone:"Z2-3",  km:22}]},
   { gw:15, fase:"Fundering", fw:7,  label:"Herstelweek",        type:"rest",  totalKm:46,
-    sessions:[{dag:"Ma",type:"Recovery",  dist:"6 km",          zone:"Z1–2",  km:6},
-              {dag:"Wo",type:"Steady",    dist:"10 km",         zone:"Z2–3",  km:10},
-              {dag:"Vr",type:"Interval",  dist:"10×400m",       zone:"Z5",    km:null},
+    sessions:[{dag:"Ma",type:"Recovery",  dist:"6 km",          zone:"Z1-2",  km:6},
+              {dag:"Wo",type:"Steady",    dist:"10 km",         zone:"Z2-3",  km:10},
+              {dag:"Vr",type:"Interval",  dist:"10x400m",       zone:"Z5",    km:null},
               {dag:"Zo",type:"Long run",  dist:"24 km",         zone:"Z2",    km:24}]},
   { gw:16, fase:"Fundering", fw:8,  label:"Piekaanloop",        type:"build", totalKm:50,
-    sessions:[{dag:"Ma",type:"Easy",      dist:"7 km",          zone:"Z1–2",  km:7},
-              {dag:"Wo",type:"Tempo",     dist:"12 km (3×3)",   zone:"Z3",    km:12},
-              {dag:"Vr",type:"Interval",  dist:"6×800m",        zone:"Z4",    km:null},
-              {dag:"Zo",type:"Long run",  dist:"25 km",         zone:"Z2–3",  km:25}]},
+    sessions:[{dag:"Ma",type:"Easy",      dist:"7 km",          zone:"Z1-2",  km:7},
+              {dag:"Wo",type:"Tempo",     dist:"12 km (3x3)",   zone:"Z3",    km:12},
+              {dag:"Vr",type:"Interval",  dist:"6x800m",        zone:"Z4",    km:null},
+              {dag:"Zo",type:"Long run",  dist:"25 km",         zone:"Z2-3",  km:25}]},
   { gw:17, fase:"Fundering", fw:9,  label:"Langste duur Funde", type:"peak",  totalKm:52,
-    sessions:[{dag:"Ma",type:"Easy",      dist:"6 km",          zone:"Z1–2",  km:6},
-              {dag:"Wo",type:"Steady",    dist:"12 km",         zone:"Z2–3",  km:12},
-              {dag:"Vr",type:"Interval",  dist:"8×600m",        zone:"Z4–5",  km:null},
+    sessions:[{dag:"Ma",type:"Easy",      dist:"6 km",          zone:"Z1-2",  km:6},
+              {dag:"Wo",type:"Steady",    dist:"12 km",         zone:"Z2-3",  km:12},
+              {dag:"Vr",type:"Interval",  dist:"8x600m",        zone:"Z4-5",  km:null},
               {dag:"Zo",type:"Long run",  dist:"27 km",         zone:"Z2",    km:27}]},
   { gw:18, fase:"Fundering", fw:10, label:"Afsluiting fundering",type:"build", totalKm:51,
-    sessions:[{dag:"Ma",type:"Recovery",  dist:"7 km",          zone:"Z1–2",  km:7},
+    sessions:[{dag:"Ma",type:"Recovery",  dist:"7 km",          zone:"Z1-2",  km:7},
               {dag:"Wo",type:"Tempo",     dist:"12 km (4 Z3)",  zone:"Z3",    km:12},
-              {dag:"Vr",type:"Interval",  dist:"5×1 km",        zone:"Z4",    km:null},
-              {dag:"Zo",type:"Long run",  dist:"26 km",         zone:"Z2–3",  km:26}]},
+              {dag:"Vr",type:"Interval",  dist:"5x1 km",        zone:"Z4",    km:null},
+              {dag:"Zo",type:"Long run",  dist:"26 km",         zone:"Z2-3",  km:26}]},
   { gw:19, fase:"Transitie", fw:1, label:"Herstel & onderhoud", type:"rest",  totalKm:28,
-    sessions:[{dag:"Di",type:"Easy run",     dist:"8 km",         zone:"Z1–Z2", km:8,  toelichting:"Rustig starten, herstelgericht"},
-              {dag:"Do",type:"Easy + strides",dist:"6 km + 4×20s",zone:"Z1–Z2",km:6,  toelichting:"Souplesse, geen vermoeidheid"},
-              {dag:"Za",type:"Long run",      dist:"14 km",        zone:"Z2",   km:14, toelichting:"Lage hartslag, ontspannen"}]},
+    sessions:[{dag:"Di",type:"Easy run",      dist:"8 km",         zone:"Z1-Z2", km:8,  toelichting:"Rustig starten, herstelgericht"},
+              {dag:"Do",type:"Easy + strides", dist:"6 km + 4x20s",zone:"Z1-Z2", km:6,  toelichting:"Souplesse, geen vermoeidheid"},
+              {dag:"Za",type:"Long run",       dist:"14 km",        zone:"Z2",    km:14, toelichting:"Lage hartslag, ontspannen"}]},
   { gw:20, fase:"Transitie", fw:2, label:"Aerobe consolidatie", type:"build", totalKm:35,
-    sessions:[{dag:"Di",type:"Steady run",   dist:"10 km",        zone:"Z2",   km:10, toelichting:"Constante aerobe prikkel"},
-              {dag:"Do",type:"Easy run",      dist:"8 km",         zone:"Z1–Z2",km:8,  toelichting:"Herstel"},
-              {dag:"Za",type:"Long run",      dist:"17 km",        zone:"Z2",   km:17, toelichting:"Ontspannen duur"}]},
+    sessions:[{dag:"Di",type:"Steady run",    dist:"10 km",        zone:"Z2",    km:10, toelichting:"Constante aerobe prikkel"},
+              {dag:"Do",type:"Easy run",       dist:"8 km",         zone:"Z1-Z2", km:8,  toelichting:"Herstel"},
+              {dag:"Za",type:"Long run",       dist:"17 km",        zone:"Z2",    km:17, toelichting:"Ontspannen duur"}]},
   { gw:21, fase:"Transitie", fw:3, label:"Lichte tempoprikkel", type:"build", totalKm:36,
-    sessions:[{dag:"Di",type:"Tempo",        dist:"10 km (2×2)",  zone:"Z3",   km:10, toelichting:"Lichte tempoprikkel"},
-              {dag:"Do",type:"Easy run",      dist:"8 km",         zone:"Z1–Z2",km:8,  toelichting:"Herstel"},
-              {dag:"Za",type:"Long run",      dist:"18 km",        zone:"Z2",   km:18, toelichting:"Laatste 2 km iets steviger"}]},
+    sessions:[{dag:"Di",type:"Tempo",         dist:"10 km (2x2)",  zone:"Z3",    km:10, toelichting:"Lichte tempoprikkel"},
+              {dag:"Do",type:"Easy run",       dist:"8 km",         zone:"Z1-Z2", km:8,  toelichting:"Herstel"},
+              {dag:"Za",type:"Long run",       dist:"18 km",        zone:"Z2",    km:18, toelichting:"Laatste 2 km iets steviger"}]},
   { gw:22, fase:"Transitie", fw:4, label:"Brug naar marathon",  type:"build", totalKm:40,
-    sessions:[{dag:"Di",type:"Steady run",   dist:"12 km",        zone:"Z2–lage Z3",km:12,toelichting:"Brug naar marathonspecifiek"},
-              {dag:"Do",type:"Easy + strides",dist:"8 km + 4×20s",zone:"Z1–Z2", km:8, toelichting:"Souplesse"},
-              {dag:"Za",type:"Long run",      dist:"20 km",        zone:"Z2",   km:20, toelichting:"Fris eindigen"}]},
+    sessions:[{dag:"Di",type:"Steady run",    dist:"12 km",        zone:"Z2",    km:12, toelichting:"Brug naar marathonspecifiek"},
+              {dag:"Do",type:"Easy + strides", dist:"8 km + 4x20s",zone:"Z1-Z2", km:8,  toelichting:"Souplesse"},
+              {dag:"Za",type:"Long run",       dist:"20 km",        zone:"Z2",    km:20, toelichting:"Fris eindigen"}]},
   { gw:23, fase:"Marathonspecifiek", fw:1,  label:"Intro marathontempo",      type:"build", totalKm:50,
-    sessions:[{dag:"Di",type:"Tempo",   dist:"12 km (2×3)", zone:"Z3",    km:12, toelichting:"Intro marathontempo"},
-              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1–Z2", km:8,  toelichting:"Herstel"},
+    sessions:[{dag:"Di",type:"Tempo",   dist:"12 km (2x3)", zone:"Z3",    km:12, toelichting:"Intro marathontempo"},
+              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1-Z2", km:8,  toelichting:"Herstel"},
               {dag:"Za",type:"Duur",    dist:"22 km",       zone:"Z2",    km:22, toelichting:"Lange rustige duur"},
               {dag:"Zo",type:"Herstel", dist:"8 km",        zone:"Z1",    km:8,  toelichting:"Actief herstel"}]},
   { gw:24, fase:"Marathonspecifiek", fw:2,  label:"Tempo verlengen",          type:"build", totalKm:55,
     sessions:[{dag:"Di",type:"Tempo",   dist:"13 km (4 km)",zone:"Z3",    km:13, toelichting:"Tempo verlengen"},
-              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1–Z2", km:8,  toelichting:"Herstel"},
+              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1-Z2", km:8,  toelichting:"Herstel"},
               {dag:"Za",type:"Duur",    dist:"24 km",       zone:"Z2",    km:24, toelichting:"Duurverlenging"},
               {dag:"Zo",type:"Herstel", dist:"10 km",       zone:"Z1",    km:10, toelichting:"Herstel"}]},
   { gw:25, fase:"Marathonspecifiek", fw:3,  label:"Tempo onder vermoeidheid", type:"build", totalKm:58,
-    sessions:[{dag:"Di",type:"Tempo",   dist:"14 km (3×3)", zone:"Z3",    km:14, toelichting:"Tempo onder vermoeidheid"},
-              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1–Z2", km:8,  toelichting:"Herstel"},
+    sessions:[{dag:"Di",type:"Tempo",   dist:"14 km (3x3)", zone:"Z3",    km:14, toelichting:"Tempo onder vermoeidheid"},
+              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1-Z2", km:8,  toelichting:"Herstel"},
               {dag:"Za",type:"Duur",    dist:"25 km",       zone:"Z2",    km:25, toelichting:"Rustige lange duur"},
               {dag:"Zo",type:"Herstel", dist:"11 km",       zone:"Z1",    km:11, toelichting:"Actief herstel"}]},
   { gw:26, fase:"Marathonspecifiek", fw:4,  label:"Ontlastweek",              type:"rest",  totalKm:46,
     sessions:[{dag:"Di",type:"Steady",  dist:"10 km",       zone:"Z2",    km:10, toelichting:"Ontlastweek"},
-              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1–Z2", km:8,  toelichting:"Herstel"},
+              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1-Z2", km:8,  toelichting:"Herstel"},
               {dag:"Za",type:"Duur",    dist:"20 km",       zone:"Z2",    km:20, toelichting:"Verkorte duur"},
               {dag:"Zo",type:"Herstel", dist:"8 km",        zone:"Z1",    km:8,  toelichting:"Herstel"}]},
   { gw:27, fase:"Marathonspecifiek", fw:5,  label:"Duurverlenging",           type:"build", totalKm:60,
     sessions:[{dag:"Di",type:"Tempo",   dist:"15 km (5 Z3)",zone:"Z3",    km:15, toelichting:"Tempo uitbreiden"},
-              {dag:"Do",type:"Easy",    dist:"10 km",       zone:"Z1–Z2", km:10, toelichting:"Herstel"},
+              {dag:"Do",type:"Easy",    dist:"10 km",       zone:"Z1-Z2", km:10, toelichting:"Herstel"},
               {dag:"Za",type:"Duur",    dist:"27 km",       zone:"Z2",    km:27, toelichting:"Duurverlenging"},
               {dag:"Zo",type:"Herstel", dist:"8 km",        zone:"Z1",    km:8,  toelichting:"Herstel"}]},
   { gw:28, fase:"Marathonspecifiek", fw:6,  label:"Langere tempoblokken",     type:"build", totalKm:62,
-    sessions:[{dag:"Di",type:"Tempo",   dist:"15 km (2×4)", zone:"Z3",    km:15, toelichting:"Langere tempoblokken"},
-              {dag:"Do",type:"Easy",    dist:"10 km",       zone:"Z1–Z2", km:10, toelichting:"Herstel"},
+    sessions:[{dag:"Di",type:"Tempo",   dist:"15 km (2x4)", zone:"Z3",    km:15, toelichting:"Langere tempoblokken"},
+              {dag:"Do",type:"Easy",    dist:"10 km",       zone:"Z1-Z2", km:10, toelichting:"Herstel"},
               {dag:"Za",type:"Duur",    dist:"28 km",       zone:"Z2",    km:28, toelichting:"Duurverlenging"},
               {dag:"Zo",type:"Herstel", dist:"9 km",        zone:"Z1",    km:9,  toelichting:"Herstel"}]},
   { gw:29, fase:"Marathonspecifiek", fw:7,  label:"Tempo stabiliseren",       type:"peak",  totalKm:64,
     sessions:[{dag:"Di",type:"Tempo",   dist:"16 km (6 Z3)",zone:"Z3",    km:16, toelichting:"Tempo stabiliseren"},
-              {dag:"Do",type:"Easy",    dist:"10 km",       zone:"Z1–Z2", km:10, toelichting:"Herstel"},
+              {dag:"Do",type:"Easy",    dist:"10 km",       zone:"Z1-Z2", km:10, toelichting:"Herstel"},
               {dag:"Za",type:"Duur",    dist:"29 km",       zone:"Z2",    km:29, toelichting:"Lange duur"},
               {dag:"Zo",type:"Herstel", dist:"9 km",        zone:"Z1",    km:9,  toelichting:"Herstel"}]},
   { gw:30, fase:"Marathonspecifiek", fw:8,  label:"Ontlastweek",              type:"rest",  totalKm:50,
     sessions:[{dag:"Di",type:"Steady",  dist:"12 km",       zone:"Z2",    km:12, toelichting:"Ontlastweek"},
-              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1–Z2", km:8,  toelichting:"Herstel"},
+              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1-Z2", km:8,  toelichting:"Herstel"},
               {dag:"Za",type:"Duur",    dist:"22 km",       zone:"Z2",    km:22, toelichting:"Verkorte duur"},
               {dag:"Zo",type:"Herstel", dist:"8 km",        zone:"Z1",    km:8,  toelichting:"Herstel"}]},
   { gw:31, fase:"Marathonspecifiek", fw:9,  label:"Piekweek",                 type:"peak",  totalKm:66,
-    sessions:[{dag:"Di",type:"Tempo",   dist:"16 km (3×4)", zone:"Z3",    km:16, toelichting:"Piekweek"},
-              {dag:"Do",type:"Easy",    dist:"10 km",       zone:"Z1–Z2", km:10, toelichting:"Herstel"},
+    sessions:[{dag:"Di",type:"Tempo",   dist:"16 km (3x4)", zone:"Z3",    km:16, toelichting:"Piekweek"},
+              {dag:"Do",type:"Easy",    dist:"10 km",       zone:"Z1-Z2", km:10, toelichting:"Herstel"},
               {dag:"Za",type:"Duur",    dist:"30 km",       zone:"Z2",    km:30, toelichting:"Langste duur"},
               {dag:"Zo",type:"Herstel", dist:"10 km",       zone:"Z1",    km:10, toelichting:"Herstel"}]},
   { gw:32, fase:"Marathonspecifiek", fw:10, label:"Marathon-simulatie",       type:"peak",  totalKm:61,
     sessions:[{dag:"Di",type:"Tempo",   dist:"14 km (6 Z3)",zone:"Z3",    km:14, toelichting:"Consolidatie"},
-              {dag:"Do",type:"Easy",    dist:"10 km",       zone:"Z1–Z2", km:10, toelichting:"Herstel"},
-              {dag:"Za",type:"Duur",    dist:"28 km (Z2→Z3)",zone:"Z2→Z3",km:28, toelichting:"Marathon-simulatie"},
+              {dag:"Do",type:"Easy",    dist:"10 km",       zone:"Z1-Z2", km:10, toelichting:"Herstel"},
+              {dag:"Za",type:"Duur",    dist:"28 km",       zone:"Z2",    km:28, toelichting:"Marathon-simulatie"},
               {dag:"Zo",type:"Herstel", dist:"9 km",        zone:"Z1",    km:9,  toelichting:"Herstel"}]},
   { gw:33, fase:"Marathonspecifiek", fw:11, label:"Start taper",              type:"taper", totalKm:46,
     sessions:[{dag:"Di",type:"Tempo",   dist:"12 km (4 Z3)",zone:"Z3",    km:12, toelichting:"Start taper"},
-              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1–Z2", km:8,  toelichting:"Herstel"},
+              {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1-Z2", km:8,  toelichting:"Herstel"},
               {dag:"Za",type:"Duur",    dist:"20 km",       zone:"Z2",    km:20, toelichting:"Belasting omlaag"},
               {dag:"Zo",type:"Herstel", dist:"6 km",        zone:"Z1",    km:6,  toelichting:"Herstel"}]},
   { gw:34, fase:"Marathonspecifiek", fw:12, label:"Race week",                type:"race",  totalKm:59.2,
-    sessions:[{dag:"Di",type:"Tempo",      dist:"8 km (2 Z3)", zone:"Z3",   km:8,    toelichting:"Spanning behouden"},
-              {dag:"Do",type:"Easy",        dist:"6 km",        zone:"Z1",   km:6,    toelichting:"Ontspannen"},
-              {dag:"Za",type:"Shake-out",   dist:"3 km",        zone:"Z1",   km:3,    toelichting:"Loslopen"},
-              {dag:"Zo",type:"MARATHON",    dist:"42.2 km",     zone:"Z2–Z3",km:42.2, toelichting:"Wedstrijd 🏁"}]},
+    sessions:[{dag:"Di",type:"Tempo",      dist:"8 km (2 Z3)", zone:"Z3",    km:8,    toelichting:"Spanning behouden"},
+              {dag:"Do",type:"Easy",        dist:"6 km",        zone:"Z1",    km:6,    toelichting:"Ontspannen"},
+              {dag:"Za",type:"Shake-out",   dist:"3 km",        zone:"Z1",    km:3,    toelichting:"Loslopen"},
+              {dag:"Zo",type:"MARATHON",    dist:"42.2 km",     zone:"Z2-Z3", km:42.2, toelichting:"Wedstrijd!"}]},
 ];
 
 const PHASE_META = {
@@ -215,27 +247,47 @@ function useWindowWidth() {
   return width;
 }
 
+function actualRunColor(s, maxKm) {
+  const [m, sc] = s.p.split(":").map(Number);
+  const pSec = m * 60 + (sc || 0);
+  if (s.km === maxKm) return "#3b82f6";
+  if (pSec < 390)     return "#f97316";
+  if (pSec < 450)     return "#8b5cf6";
+  return "#22c55e";
+}
+
 function makeChart(selGw) {
   return ALL_WEEKS.map(w => {
     const longRun = w.sessions.find(s => ["Long run","Duur","MARATHON"].includes(s.type));
-    const km = longRun?.km ?? null;
+    const planKm  = longRun?.km ?? null;
+    const act     = ACTUAL_DATA[w.gw];
     return {
-      week:     w.gw,
-      fase:     w.fase,
-      km,
-      afgerond: w.gw <  selGw ? km : w.gw === selGw ? km : null,
-      gepland:  w.gw >  selGw ? km : null,
-      selected: w.gw === selGw,
+      week:      w.gw,
+      fase:      w.fase,
+      plan:      planKm,
+      werkelijk: w.gw <= REAL_NOW ? (act?.lr ?? null) : null,
+      gepland:   w.gw >  REAL_NOW ? planKm : null,
+      selected:  w.gw === selGw,
     };
   });
 }
 
-function KpiCard({ label, value, sub, accent }) {
+// ─── COMPONENTS ──────────────────────────────────────────────────────────────
+
+function KpiCard({ label, value, sub, accent, delta }) {
+  const positive = delta > 0;
   return (
-    <div style={{ background: accent ? "#0f172a" : "#fff", border: accent ? "none" : "1px solid #e2e8f0", borderRadius: 12, padding: "14px 16px", display:"flex", flexDirection:"column", gap:3 }}>
+    <div style={{ background: accent ? "#0f172a" : "#fff", border: accent ? "none" : "1px solid #e2e8f0", borderRadius:12, padding:"14px 16px", display:"flex", flexDirection:"column", gap:3 }}>
       <span style={{ fontSize:10, fontWeight:700, letterSpacing:"0.09em", color: accent ? "#94a3b8" : "#64748b", textTransform:"uppercase" }}>{label}</span>
       <span style={{ fontSize:21, fontWeight:700, color: accent ? "#fff" : "#0f172a", letterSpacing:"-0.02em", lineHeight:1.1 }}>{value}</span>
-      {sub && <span style={{ fontSize:11, color: accent ? "#64748b" : "#94a3b8", marginTop:1 }}>{sub}</span>}
+      <div style={{ display:"flex", alignItems:"center", gap:5, marginTop:1, flexWrap:"wrap" }}>
+        {sub && <span style={{ fontSize:11, color: accent ? "#64748b" : "#94a3b8" }}>{sub}</span>}
+        {delta != null && (
+          <span style={{ fontSize:10, fontWeight:700, color: positive ? "#16a34a" : "#dc2626", background: positive ? "#dcfce7" : "#fee2e2", padding:"1px 5px", borderRadius:4 }}>
+            {positive ? "+" : ""}{delta}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -252,9 +304,8 @@ function SessionCard({ dag, type, dist, zone, toelichting, km }) {
           </div>
           <div style={{ textAlign:"right" }}>
             {km != null
-              ? <><div style={{ fontSize:19, fontWeight:700, color, fontFamily:"DM Mono, monospace", lineHeight:1 }}>{km}</div><div style={{ fontSize:9, color:"#94a3b8" }}>km</div></>
-              : <div style={{ fontSize:13, fontWeight:700, color, fontFamily:"DM Mono, monospace" }}>{dist}</div>
-            }
+              ? <><div style={{ fontSize:19, fontWeight:700, color, fontFamily:"DM Mono, monospace", lineHeight:1 }}>{km}</div><div style={{ fontSize:9, color:"#94a3b8" }}>km plan</div></>
+              : <div style={{ fontSize:13, fontWeight:700, color, fontFamily:"DM Mono, monospace" }}>{dist}</div>}
           </div>
         </div>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:6 }}>
@@ -266,27 +317,60 @@ function SessionCard({ dag, type, dist, zone, toelichting, km }) {
   );
 }
 
+function ActualRunCard({ s, maxKm }) {
+  const color   = actualRunColor(s, maxKm);
+  const isLong  = s.km === maxKm;
+  const [m, sc] = s.p.split(":").map(Number);
+  const label   = isLong ? "Lange duur" : (m * 60 + (sc || 0)) < 390 ? "Tempo" : "Easy run";
+  return (
+    <div style={{ border:`1px solid ${color}33`, borderRadius:10, overflow:"hidden", background: isLong ? `${color}08` : "#fff" }}>
+      <div style={{ padding:"11px 14px", borderLeft:`4px solid ${color}` }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:4 }}>
+          <div>
+            <span style={{ fontSize:9, fontWeight:700, letterSpacing:"0.09em", color:"#94a3b8", textTransform:"uppercase" }}>{s.d}</span>
+            <div style={{ fontSize:13, fontWeight:700, color:"#0f172a", marginTop:1 }}>{label}</div>
+          </div>
+          <div style={{ textAlign:"right" }}>
+            <div style={{ fontSize:20, fontWeight:700, color, fontFamily:"DM Mono, monospace", lineHeight:1 }}>{s.km}</div>
+            <div style={{ fontSize:9, color:"#94a3b8" }}>km</div>
+          </div>
+        </div>
+        <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+          <span style={{ fontSize:11, color:"#475569", fontFamily:"DM Mono, monospace" }}>&#9201; {s.p}/km</span>
+          <span style={{ fontSize:11, color:"#94a3b8" }}>&#9829; {s.hr}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const CustomTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
-  const d = payload[0]?.payload;
-  const km = d?.afgerond ?? d?.gepland;
-  if (!km) return null;
-  const pm = PHASE_META[d.fase];
+  const d  = payload[0]?.payload;
+  if (!d) return null;
+  const pm   = PHASE_META[d.fase];
+  const diff = d.werkelijk != null && d.plan != null
+    ? Math.round((d.werkelijk - d.plan) * 10) / 10 : null;
   return (
-    <div style={{ background:"#fff", border:"1px solid #e2e8f0", borderRadius:8, padding:"10px 14px", fontSize:13, boxShadow:"0 4px 16px rgba(0,0,0,0.08)" }}>
+    <div style={{ background:"#fff", border:"1px solid #e2e8f0", borderRadius:8, padding:"10px 14px", fontSize:13, boxShadow:"0 4px 16px rgba(0,0,0,0.08)", minWidth:160 }}>
       <div style={{ fontWeight:700, color:"#0f172a" }}>Week {d.week}</div>
-      <div style={{ color: pm?.color ?? "#64748b", fontSize:11, fontWeight:600 }}>{d.fase}</div>
-      <div style={{ fontSize:18, fontWeight:700, color:"#1d4ed8", marginTop:4, fontFamily:"DM Mono, monospace" }}>{km} <span style={{ fontSize:12, fontWeight:500 }}>km long</span></div>
-      {d.selected && <div style={{ fontSize:10, color:"#f97316", fontWeight:700, marginTop:3 }}>◀ GESELECTEERD</div>}
+      <div style={{ color: pm?.color ?? "#64748b", fontSize:11, fontWeight:600, marginBottom:6 }}>{d.fase}</div>
+      {d.werkelijk != null && <div style={{ fontSize:15, fontWeight:700, color:"#f97316", fontFamily:"DM Mono, monospace" }}>{d.werkelijk} km <span style={{ fontSize:11, fontWeight:500, color:"#64748b" }}>gelopen</span></div>}
+      {d.plan != null      && <div style={{ fontSize:12, color:"#94a3b8", fontFamily:"DM Mono, monospace" }}>{d.plan} km gepland</div>}
+      {diff != null        && <div style={{ fontSize:10, fontWeight:700, color: diff >= 0 ? "#16a34a" : "#dc2626", marginTop:2 }}>{diff >= 0 ? "+" : ""}{diff} km vs plan</div>}
+      {d.gepland != null   && <div style={{ fontSize:15, fontWeight:700, color:"#93c5fd", fontFamily:"DM Mono, monospace" }}>{d.gepland} km <span style={{ fontSize:11, fontWeight:500, color:"#64748b" }}>gepland</span></div>}
+      {d.selected          && <div style={{ fontSize:10, color:"#f97316", fontWeight:700, marginTop:3 }}>GESELECTEERD</div>}
     </div>
   );
 };
 
+// ─── MAIN ────────────────────────────────────────────────────────────────────
+
 export default function MarathonDashboard() {
   const [sel, setSel] = useState(REAL_NOW);
-  const width = useWindowWidth();
+  const width    = useWindowWidth();
   const isMobile = width < 640;
-  const px = isMobile ? 16 : 28;
+  const px       = isMobile ? 16 : 28;
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -294,16 +378,26 @@ export default function MarathonDashboard() {
     document.head.appendChild(link);
   }, []);
 
-  const wd       = ALL_WEEKS[sel - 1];
-  const isNow    = sel === REAL_NOW;
-  const isPast   = sel < REAL_NOW;
-  const isFut    = sel > REAL_NOW;
-  const tm       = TYPE_META[wd.type];
-  const pm       = PHASE_META[wd.fase];
-  const chart    = makeChart(sel);
-  const longRun  = wd.sessions.find(s => ["Long run","Duur","MARATHON"].includes(s.type));
-  const refColor = isNow ? "#dc2626" : isFut ? "#3b82f6" : "#f97316";
+  const wd        = ALL_WEEKS[sel - 1];
+  const isNow     = sel === REAL_NOW;
+  const isPast    = sel < REAL_NOW;
+  const isFut     = sel > REAL_NOW;
+  const tm        = TYPE_META[wd.type];
+  const pm        = PHASE_META[wd.fase];
+  const chart     = makeChart(sel);
+  const longRun   = wd.sessions.find(s => ["Long run","Duur","MARATHON"].includes(s.type));
   const nextWeeks = ALL_WEEKS.slice(sel, Math.min(sel + 3, 34));
+
+  const act         = ACTUAL_DATA[sel];
+  const hasActual   = !!act && !isFut;
+  const actualMaxKm = act ? Math.max(...act.s.map(s => s.km)) : null;
+
+  const kpiVol      = hasActual ? `${act.km} km`  : `${wd.totalKm} km`;
+  const kpiVolSub   = hasActual ? `Plan: ${wd.totalKm} km` : "Geplande km";
+  const kpiVolDelta = hasActual ? Math.round((act.km - wd.totalKm) * 10) / 10 : null;
+  const kpiLr       = hasActual ? `${act.lr} km`  : longRun ? `${longRun.km ?? longRun.dist}${longRun.km ? " km" : ""}` : "-";
+  const kpiLrSub    = hasActual ? `Plan: ${longRun?.km ?? "-"} km` : (longRun?.toelichting?.split("·")[0] || longRun?.dist);
+  const kpiLrDelta  = hasActual && longRun?.km ? Math.round((act.lr - longRun.km) * 10) / 10 : null;
 
   const NavBtn = ({ dir }) => {
     const disabled = dir === -1 ? sel === 1 : sel === 34;
@@ -312,9 +406,9 @@ export default function MarathonDashboard() {
         style={{ width:36, height:36, borderRadius:8, border:"1px solid #e2e8f0",
           background: disabled ? "#f8fafc" : "#fff", cursor: disabled ? "not-allowed" : "pointer",
           display:"flex", alignItems:"center", justifyContent:"center",
-          color: disabled ? "#cbd5e1" : "#0f172a", fontSize:20, transition:"all 0.15s",
-          flexShrink:0 }}
-      >{dir === -1 ? "‹" : "›"}</button>
+          color: disabled ? "#cbd5e1" : "#0f172a", fontSize:20, transition:"all 0.15s", flexShrink:0 }}>
+        {dir === -1 ? "<" : ">"}
+      </button>
     );
   };
 
@@ -329,44 +423,39 @@ export default function MarathonDashboard() {
           </div>
           <div>
             <div style={{ fontSize:14, fontWeight:700, color:"#0f172a" }}>Marathon 2026</div>
-            <div style={{ fontSize:10, color:"#94a3b8" }}>Rotterdam · 12 april 2026</div>
+            <div style={{ fontSize:10, color:"#94a3b8" }}>Rotterdam - 12 april 2026</div>
           </div>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:10, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "space-between" : "flex-end" }}>
-          {!isMobile && (
-            <div style={{ textAlign:"right" }}>
-              <div style={{ fontSize:10, fontWeight:700, color:"#94a3b8", textTransform:"uppercase", letterSpacing:"0.06em" }}>Huidige positie</div>
-              <div style={{ fontSize:12, fontWeight:600, color:"#0f172a" }}>Marathonspecifiek — Week 3 van 12</div>
-            </div>
-          )}
+          {!isMobile && <div style={{ textAlign:"right" }}>
+            <div style={{ fontSize:10, fontWeight:700, color:"#94a3b8", textTransform:"uppercase", letterSpacing:"0.06em" }}>Huidige positie</div>
+            <div style={{ fontSize:12, fontWeight:600, color:"#0f172a" }}>Marathonspecifiek - Week 3 van 12</div>
+          </div>}
           {isMobile && <div style={{ fontSize:12, fontWeight:600, color:"#0f172a" }}>MS Week 3/12</div>}
-          <div style={{ background:"#fee2e2", color:"#dc2626", borderRadius:8, padding:"5px 12px", fontSize:13, fontWeight:700, fontFamily:"DM Mono, monospace", flexShrink:0 }}>30 dgn</div>
+          <div style={{ background:"#fee2e2", color:"#dc2626", borderRadius:8, padding:"5px 12px", fontSize:13, fontWeight:700, fontFamily:"DM Mono, monospace", flexShrink:0 }}>29 dgn</div>
         </div>
       </div>
 
       {/* PHASE PROGRESS BAR */}
       <div style={{ padding:`14px ${px}px 0`, borderBottom:"1px solid #f1f5f9" }}>
         <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:7 }}>
-          Programma · week {sel}/34
+          Programma - week {sel}/34
         </div>
         <div style={{ display:"flex", gap:3, height:4, borderRadius:6, overflow:"hidden", marginBottom:8 }}>
           {[{name:"Basis",w:8},{name:"Fundering",w:10},{name:"Transitie",w:4},{name:"Marathonspecifiek",w:12}].map((p,i) => {
-            const startGw = [1,9,19,23][i];
-            const endGw   = startGw + p.w - 1;
+            const startGw = [1,9,19,23][i], endGw = startGw + p.w - 1;
             const allDone = sel > endGw;
-            const partialFill = sel >= startGw && sel <= endGw ? ((sel - startGw + 1) / p.w) * 100 : 0;
-            const bgColor = PHASE_META[p.name].color;
+            const pct = sel >= startGw && sel <= endGw ? ((sel - startGw + 1) / p.w) * 100 : 0;
             return (
               <div key={p.name} style={{ width:`${(p.w/34)*100}%`, background:"#e2e8f0", borderRadius:3, overflow:"hidden" }}>
-                <div style={{ width: allDone ? "100%" : `${partialFill}%`, height:"100%", background: bgColor, transition:"width 0.35s ease" }} />
+                <div style={{ width: allDone ? "100%" : `${pct}%`, height:"100%", background: PHASE_META[p.name].color, transition:"width 0.35s ease" }} />
               </div>
             );
           })}
         </div>
         <div style={{ display:"flex", gap:3, marginBottom:14 }}>
-          {[{name:"Basis",period:"sep–okt",short:"Basis",w:8},{name:"Fundering",period:"nov–jan",short:"Fund.",w:10},{name:"Transitie",period:"feb",short:"Trans.",w:4},{name:"Marathonspecifiek",period:"mrt–apr",short:"MS",w:12}].map(p => {
-            const pm2 = PHASE_META[p.name];
-            const isActive = wd.fase === p.name;
+          {[{name:"Basis",period:"sep-okt",short:"Basis",w:8},{name:"Fundering",period:"nov-jan",short:"Fund.",w:10},{name:"Transitie",period:"feb",short:"Trans.",w:4},{name:"Marathonspecifiek",period:"mrt-apr",short:"MS",w:12}].map(p => {
+            const pm2 = PHASE_META[p.name], isActive = wd.fase === p.name;
             return (
               <div key={p.name} style={{ width:`${(p.w/34)*100}%`, overflow:"hidden" }}>
                 <div style={{ fontSize: isMobile ? 9 : 10, fontWeight: isActive ? 700 : 500, color: isActive ? pm2.color : "#94a3b8", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{isMobile ? p.short : p.name}</div>
@@ -379,27 +468,23 @@ export default function MarathonDashboard() {
 
       {/* WEEK NAVIGATOR */}
       <div style={{ padding:`12px ${px}px`, borderBottom:"1px solid #f1f5f9" }}>
-        {/* Phase tabs */}
         <div style={{ display:"flex", gap:4, marginBottom:10, overflowX:"auto", WebkitOverflowScrolling:"touch", scrollbarWidth:"none" }}>
           {Object.entries(PHASE_META).map(([name, meta]) => {
-            const [start] = meta.range;
-            const isActive = wd.fase === name;
-            const shortNames = { "Basis":"Basis", "Fundering":"Fund.", "Transitie":"Trans.", "Marathonspecifiek":"MS" };
+            const [start] = meta.range, isActive = wd.fase === name;
+            const short = {"Basis":"Basis","Fundering":"Fund.","Transitie":"Trans.","Marathonspecifiek":"MS"};
             return (
               <button key={name} onClick={() => setSel(start)}
                 style={{ padding: isMobile ? "5px 10px" : "5px 12px", borderRadius:6, border:"1px solid",
-                  borderColor: isActive ? meta.color : "#e2e8f0",
-                  background: isActive ? meta.bg : "#fff",
-                  color: isActive ? meta.color : "#94a3b8",
-                  fontSize:11, fontWeight: isActive ? 700 : 500, cursor:"pointer",
-                  transition:"all 0.15s", whiteSpace:"nowrap", flexShrink:0 }}
-              >{isMobile ? shortNames[name] : name}</button>
+                  borderColor: isActive ? meta.color : "#e2e8f0", background: isActive ? meta.bg : "#fff",
+                  color: isActive ? meta.color : "#94a3b8", fontSize:11, fontWeight: isActive ? 700 : 500,
+                  cursor:"pointer", transition:"all 0.15s", whiteSpace:"nowrap", flexShrink:0 }}>
+                {isMobile ? short[name] : name}
+              </button>
             );
           })}
         </div>
 
-        {/* Week selector row */}
-        <div style={{ display:"flex", alignItems:"center", gap: isMobile ? 8 : 10, justifyContent:"space-between", flexWrap: isMobile ? "wrap" : "nowrap" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8, justifyContent:"space-between", flexWrap: isMobile ? "wrap" : "nowrap" }}>
           <div style={{ display:"flex", alignItems:"center", gap:8, flex: isMobile ? "1 1 100%" : "0 0 auto", justifyContent: isMobile ? "space-between" : "flex-start" }}>
             <NavBtn dir={-1} />
             <div style={{ textAlign:"center", flex:1 }}>
@@ -408,7 +493,7 @@ export default function MarathonDashboard() {
                   {wd.fase === "Marathonspecifiek" ? `MS Week ${wd.fw}` : wd.fase === "Transitie" ? `Transitie W${wd.fw}` : `${wd.fase} Week ${wd.fw}`}
                 </span>
                 <span style={{ fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:4, background:tm.bg, color:tm.color, fontFamily:"DM Mono, monospace" }}>{tm.label}</span>
-                {isNow && <span style={{ fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:4, background:"#0f172a", color:"#fff", letterSpacing:"0.04em" }}>NU</span>}
+                {isNow && <span style={{ fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:4, background:"#0f172a", color:"#fff" }}>NU</span>}
                 {isPast && <span style={{ fontSize:10, color:"#94a3b8", fontWeight:500 }}>voltooid</span>}
                 {isFut  && <span style={{ fontSize:10, color:"#3b82f6", fontWeight:600 }}>gepland</span>}
               </div>
@@ -417,23 +502,20 @@ export default function MarathonDashboard() {
             <NavBtn dir={1} />
           </div>
 
-          {/* Week pills */}
           <div style={{ display:"flex", gap:3, flexWrap:"wrap", maxWidth: isMobile ? "100%" : 340, flex: isMobile ? "1 1 100%" : "0 0 auto" }}>
             {ALL_WEEKS.filter(w => w.fase === wd.fase).map(w => {
-              const isSel = w.gw === sel;
-              const isCur = w.gw === REAL_NOW;
-              const wtm   = TYPE_META[w.type];
-              const wpm   = PHASE_META[w.fase];
+              const isSel = w.gw === sel, isCur = w.gw === REAL_NOW;
+              const hasAct = !!ACTUAL_DATA[w.gw];
+              const wtm = TYPE_META[w.type], wpm = PHASE_META[w.fase];
               return (
-                <button key={w.gw} onClick={() => setSel(w.gw)}
-                  title={`Week ${w.fw} · ${w.label}`}
+                <button key={w.gw} onClick={() => setSel(w.gw)} title={`Week ${w.fw} - ${w.label}`}
                   style={{ width:28, height:28, borderRadius:6,
-                    border: isCur && !isSel ? `2px solid ${wpm.color}` : "1px solid transparent",
-                    background: isSel ? "#0f172a" : w.gw < REAL_NOW ? "#f1f5f9" : wtm.bg,
-                    color: isSel ? "#fff" : w.gw < REAL_NOW ? "#94a3b8" : wtm.color,
-                    fontSize:10, fontWeight:700, cursor:"pointer",
-                    fontFamily:"DM Mono, monospace", transition:"all 0.15s" }}
-                >{w.fw}</button>
+                    border: isSel ? "none" : isCur ? `2px solid ${wpm.color}` : hasAct ? "1px solid #22c55e44" : "1px solid transparent",
+                    background: isSel ? "#0f172a" : hasAct ? "#f0fdf4" : w.gw < REAL_NOW ? "#f1f5f9" : wtm.bg,
+                    color: isSel ? "#fff" : hasAct ? "#16a34a" : w.gw < REAL_NOW ? "#94a3b8" : wtm.color,
+                    fontSize:10, fontWeight:700, cursor:"pointer", fontFamily:"DM Mono, monospace", transition:"all 0.15s" }}>
+                  {w.fw}
+                </button>
               );
             })}
           </div>
@@ -442,8 +524,8 @@ export default function MarathonDashboard() {
 
       {/* KPI ROW */}
       <div style={{ padding:`14px ${px}px`, display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr 1fr", gap:10 }}>
-        <KpiCard label="Week volume" value={`${wd.totalKm} km`} sub="Geplande km" accent />
-        <KpiCard label="Long run" value={longRun ? `${longRun.km ?? longRun.dist}${longRun.km ? " km" : ""}` : "–"} sub={longRun?.toelichting?.split("·")[0] || longRun?.dist} />
+        <KpiCard label="Week volume" value={kpiVol} sub={kpiVolSub} accent delta={kpiVolDelta} />
+        <KpiCard label="Long run" value={kpiLr} sub={kpiLrSub} delta={kpiLrDelta} />
         <KpiCard label={`Week in ${wd.fase === "Marathonspecifiek" ? "MS" : wd.fase}`} value={`${wd.fw} / ${[8,10,4,12][["Basis","Fundering","Transitie","Marathonspecifiek"].indexOf(wd.fase)]}`} sub={wd.fase} />
         <KpiCard label="Bloktype" value={tm.label} sub={wd.label} />
       </div>
@@ -452,31 +534,67 @@ export default function MarathonDashboard() {
       <div style={{ padding:`0 ${px}px 18px`, display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1.3fr 1fr", gap:18 }}>
         <div>
           <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
-            <span style={{ fontSize:12, fontWeight:700, color:"#0f172a" }}>Trainingen</span>
-            <span style={{ fontSize:10, padding:"2px 8px", borderRadius:4, background:pm.bg, color:pm.color, border:`1px solid ${pm.border}`, fontWeight:600 }}>{wd.fase}</span>
-            {isNow && <span style={{ fontSize:10, fontWeight:700, padding:"2px 6px", borderRadius:4, background:"#dcfce7", color:"#16a34a" }}>LOPEND</span>}
+            {hasActual ? (
+              <>
+                <span style={{ fontSize:12, fontWeight:700, color:"#0f172a" }}>Gelopen</span>
+                <span style={{ fontSize:10, padding:"2px 8px", borderRadius:4, background:"#dcfce7", color:"#16a34a", border:"1px solid #bbf7d0", fontWeight:600 }}>Garmin</span>
+                {isNow && <span style={{ fontSize:10, fontWeight:700, padding:"2px 6px", borderRadius:4, background:"#0f172a", color:"#fff" }}>LOPEND</span>}
+              </>
+            ) : (
+              <>
+                <span style={{ fontSize:12, fontWeight:700, color:"#0f172a" }}>Trainingen</span>
+                <span style={{ fontSize:10, padding:"2px 8px", borderRadius:4, background:pm.bg, color:pm.color, border:`1px solid ${pm.border}`, fontWeight:600 }}>{wd.fase}</span>
+                {isNow && <span style={{ fontSize:10, fontWeight:700, padding:"2px 6px", borderRadius:4, background:"#dcfce7", color:"#16a34a" }}>LOPEND</span>}
+              </>
+            )}
           </div>
-          <div style={{ display:"grid", gridTemplateColumns: isMobile && wd.sessions.length <= 3 ? "1fr" : "1fr 1fr", gap:8 }}>
-            {wd.sessions.map(s => <SessionCard key={s.dag} {...s} />)}
-          </div>
+
+          {hasActual && (
+            <div style={{ display:"grid", gridTemplateColumns: isMobile && act.s.length <= 3 ? "1fr" : "1fr 1fr", gap:8, marginBottom: isNow ? 14 : 0 }}>
+              {act.s.map(s => <ActualRunCard key={s.d} s={s} maxKm={actualMaxKm} />)}
+            </div>
+          )}
+
+          {isNow && (() => {
+            const remaining = wd.sessions.slice(act?.s?.length ?? 0);
+            if (!remaining.length) return null;
+            return (
+              <>
+                <div style={{ fontSize:11, fontWeight:600, color:"#94a3b8", marginBottom:8, display:"flex", alignItems:"center", gap:6 }}>
+                  <div style={{ height:1, flex:1, background:"#f1f5f9" }} />
+                  Nog te lopen
+                  <div style={{ height:1, flex:1, background:"#f1f5f9" }} />
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+                  {remaining.map(s => <SessionCard key={s.dag} {...s} />)}
+                </div>
+              </>
+            );
+          })()}
+
+          {isFut && (
+            <div style={{ display:"grid", gridTemplateColumns: isMobile && wd.sessions.length <= 3 ? "1fr" : "1fr 1fr", gap:8 }}>
+              {wd.sessions.map(s => <SessionCard key={s.dag} {...s} />)}
+            </div>
+          )}
         </div>
 
         <div>
           <div style={{ fontSize:12, fontWeight:700, color:"#0f172a", marginBottom:10 }}>
-            {sel < 34 ? "Volgende weken" : "Finish 🏁"}
+            {sel < 34 ? "Volgende weken" : "Finish!"}
           </div>
           {nextWeeks.length > 0 ? (
             <div style={{ border:"1px solid #e2e8f0", borderRadius:10, overflow:"hidden" }}>
               {nextWeeks.map((w, i) => {
-                const wtm = TYPE_META[w.type];
-                const wpm = PHASE_META[w.fase];
+                const wtm = TYPE_META[w.type], wpm = PHASE_META[w.fase];
+                const wAct = ACTUAL_DATA[w.gw];
                 const isNewPhase = i > 0 ? w.fase !== nextWeeks[i-1].fase : w.fase !== wd.fase;
                 return (
                   <div key={w.gw}>
                     {i > 0 && <div style={{ height:1, background:"#f1f5f9" }} />}
                     {(i === 0 && w.fase !== wd.fase) || isNewPhase ? (
                       <div style={{ padding:"6px 14px 4px", background:wpm.bg, borderBottom:`1px solid ${wpm.border}` }}>
-                        <span style={{ fontSize:9, fontWeight:700, color:wpm.color, textTransform:"uppercase", letterSpacing:"0.06em" }}>▶ {w.fase}</span>
+                        <span style={{ fontSize:9, fontWeight:700, color:wpm.color, textTransform:"uppercase", letterSpacing:"0.06em" }}>{w.fase}</span>
                       </div>
                     ) : null}
                     <div style={{ padding:"10px 14px", display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer" }}
@@ -489,11 +607,15 @@ export default function MarathonDashboard() {
                           <span style={{ fontSize:11, fontWeight:600, color:"#0f172a" }}>{w.label}</span>
                           <span style={{ fontSize:9, fontWeight:700, padding:"1px 5px", borderRadius:3, background:wtm.bg, color:wtm.color }}>{wtm.label}</span>
                         </div>
-                        <div style={{ fontSize:10, color:"#94a3b8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{w.sessions.map(s => `${s.type} ${s.km != null ? s.km+"km" : s.dist}`).join(" · ")}</div>
+                        <div style={{ fontSize:10, color:"#94a3b8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                          {wAct
+                            ? wAct.s.map(s => `${s.km}km`).join(" - ")
+                            : w.sessions.map(s => `${s.type} ${s.km != null ? s.km+"km" : s.dist}`).join(" - ")}
+                        </div>
                       </div>
                       <div style={{ textAlign:"right", flexShrink:0, marginLeft:8 }}>
-                        <div style={{ fontSize:15, fontWeight:700, color:"#0f172a", fontFamily:"DM Mono, monospace" }}>{w.totalKm}</div>
-                        <div style={{ fontSize:9, color:"#94a3b8" }}>km</div>
+                        <div style={{ fontSize:15, fontWeight:700, color: wAct ? "#16a34a" : "#0f172a", fontFamily:"DM Mono, monospace" }}>{wAct ? wAct.km : w.totalKm}</div>
+                        <div style={{ fontSize:9, color:"#94a3b8" }}>km{wAct ? " v" : ""}</div>
                       </div>
                     </div>
                   </div>
@@ -502,9 +624,9 @@ export default function MarathonDashboard() {
             </div>
           ) : (
             <div style={{ border:"1px solid #e2e8f0", borderRadius:10, padding:"28px 16px", textAlign:"center" }}>
-              <div style={{ fontSize:32, marginBottom:8 }}>🏁</div>
-              <div style={{ fontSize:13, fontWeight:700, color:"#0f172a" }}>Rotterdam · 12 april 2026</div>
-              <div style={{ fontSize:11, color:"#94a3b8", marginTop:4 }}>Last dance. Ren 'm!</div>
+              <div style={{ fontSize:32, marginBottom:8 }}>!</div>
+              <div style={{ fontSize:13, fontWeight:700, color:"#0f172a" }}>Rotterdam - 12 april 2026</div>
+              <div style={{ fontSize:11, color:"#94a3b8", marginTop:4 }}>Last dance. Ren em!</div>
             </div>
           )}
         </div>
@@ -515,11 +637,11 @@ export default function MarathonDashboard() {
         <div style={{ border:"1px solid #e2e8f0", borderRadius:12, overflow:"hidden" }}>
           <div style={{ padding:`16px ${isMobile ? 14 : 22}px 0`, display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:8 }}>
             <div>
-              <div style={{ fontSize:12, fontWeight:700, color:"#0f172a" }}>Long run progressie · 34 weken</div>
-              {!isMobile && <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>Klik op een punt om naar die week te springen</div>}
+              <div style={{ fontSize:12, fontWeight:700, color:"#0f172a" }}>Long run - plan vs gelopen</div>
+              {!isMobile && <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>Oranje = daadwerkelijk gelopen - Blauw = toekomstig gepland</div>}
             </div>
             <div style={{ display:"flex", gap: isMobile ? 8 : 12, flexWrap:"wrap" }}>
-              {[["#0f172a","Afgerond"],["#93c5fd","Gepland"],["#f97316","Geselecteerd"]].map(([c,l]) => (
+              {[["#f97316","Gelopen"],["#93c5fd","Gepland"],["#d1d5db","Plan ref."]].map(([c,l]) => (
                 <div key={l} style={{ display:"flex", alignItems:"center", gap:4 }}>
                   <div style={{ width:8, height:8, borderRadius:"50%", background:c }} />
                   <span style={{ fontSize:10, color:"#64748b" }}>{l}</span>
@@ -532,9 +654,9 @@ export default function MarathonDashboard() {
               <AreaChart data={chart} margin={{ top:8, right:8, left: isMobile ? -28 : -20, bottom:0 }}
                 onClick={e => { if (e?.activePayload?.[0]) setSel(e.activePayload[0].payload.week); }}>
                 <defs>
-                  <linearGradient id="gD" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#0f172a" stopOpacity={0.10}/>
-                    <stop offset="95%" stopColor="#0f172a" stopOpacity={0.01}/>
+                  <linearGradient id="gW" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#f97316" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#f97316" stopOpacity={0.01}/>
                   </linearGradient>
                   <linearGradient id="gP" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%"  stopColor="#3b82f6" stopOpacity={0.08}/>
@@ -553,16 +675,19 @@ export default function MarathonDashboard() {
                 <ReferenceLine x={REAL_NOW} stroke="#dc2626" strokeWidth={1} strokeDasharray="3 2"
                   label={{ value:"Nu", position:"top", fontSize:8, fill:"#dc2626", fontWeight:700, fontFamily:"DM Mono, monospace" }}/>
                 {sel !== REAL_NOW && (
-                  <ReferenceLine x={sel} stroke={refColor} strokeWidth={2}
-                    label={{ value:`W${sel}`, position:"top", fontSize:9, fill:refColor, fontWeight:700, fontFamily:"DM Mono, monospace" }}/>
+                  <ReferenceLine x={sel} stroke={isPast ? "#f97316" : "#3b82f6"} strokeWidth={2}
+                    label={{ value:`W${sel}`, position:"top", fontSize:9, fill: isPast ? "#f97316" : "#3b82f6", fontWeight:700, fontFamily:"DM Mono, monospace" }}/>
                 )}
-                <Area type="monotone" dataKey="afgerond" stroke="#0f172a" strokeWidth={2} fill="url(#gD)"
+                <Area type="monotone" dataKey="plan" stroke="#d1d5db" strokeWidth={1} strokeDasharray="3 2"
+                  fill="none" dot={false} connectNulls activeDot={false}/>
+                <Area type="monotone" dataKey="werkelijk" stroke="#f97316" strokeWidth={2.5} fill="url(#gW)"
                   dot={props => {
                     const d = props.payload;
-                    if (d.selected) return <circle key={`s${d.week}`} cx={props.cx} cy={props.cy} r={5} fill="#f97316" stroke="#fff" strokeWidth={2}/>;
-                    return <circle key={`d${d.week}`} cx={props.cx} cy={props.cy} r={0}/>;
+                    if (d.selected && d.werkelijk != null)
+                      return <circle key={`s${d.week}`} cx={props.cx} cy={props.cy} r={5} fill="#f97316" stroke="#fff" strokeWidth={2}/>;
+                    return <circle key={`nd${d.week}`} cx={props.cx} cy={props.cy} r={0}/>;
                   }}
-                  connectNulls={false} activeDot={{ r:4, fill:"#0f172a" }}/>
+                  connectNulls={false} activeDot={{ r:4, fill:"#f97316" }}/>
                 <Area type="monotone" dataKey="gepland" stroke="#93c5fd" strokeWidth={2} strokeDasharray="5 3"
                   fill="url(#gP)" dot={false} connectNulls={false} activeDot={{ r:4, fill:"#3b82f6" }}/>
               </AreaChart>
@@ -578,8 +703,8 @@ export default function MarathonDashboard() {
 
       {/* FOOTER */}
       <div style={{ borderTop:"1px solid #f1f5f9", padding:`10px ${px}px`, display:"flex", justifyContent:"space-between", flexWrap:"wrap", gap:4 }}>
-        <span style={{ fontSize:10, color:"#cbd5e1" }}>Marathon Rotterdam · april 2026</span>
-        <span style={{ fontSize:10, fontFamily:"DM Mono, monospace", color:"#cbd5e1" }}>week {sel}/34 · {wd.fase} W{wd.fw}</span>
+        <span style={{ fontSize:10, color:"#cbd5e1" }}>Marathon Rotterdam - april 2026</span>
+        <span style={{ fontSize:10, fontFamily:"DM Mono, monospace", color:"#cbd5e1" }}>week {sel}/34 - {wd.fase} W{wd.fw}</span>
       </div>
     </div>
   );
