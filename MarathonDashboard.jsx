@@ -3,7 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 const FONT_URL = "https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap";
 
-const REAL_NOW = 25; // global week 25 = Marathonspecifiek week 3
+const REAL_NOW = 25;
 
 const SESSION_COLORS = {
   "Easy run": "#22c55e", "Easy": "#22c55e", "Recovery": "#22c55e",
@@ -22,7 +22,6 @@ const zoneColor = z => ({
 // ─── ALL 34 WEEKS ────────────────────────────────────────────────────────────
 
 const ALL_WEEKS = [
-  // ── BASIS (W1–8) ──────────────────────────────────────────────────────────
   { gw:1,  fase:"Basis",  fw:1,  label:"Basisopbouw start",   type:"build", totalKm:20,
     sessions:[{dag:"Ma",type:"Easy run",dist:"5 km",    zone:"Zone 2",km:5},
               {dag:"Wo",type:"Tempo",   dist:"20 min",  zone:"Zone 3",km:null},
@@ -63,8 +62,6 @@ const ALL_WEEKS = [
               {dag:"Wo",type:"Tempo",   dist:"40 min",  zone:"Zone 3",km:null},
               {dag:"Vr",type:"Interval",dist:"8×500m",  zone:"Zone 4",km:null},
               {dag:"Zo",type:"Long run",dist:"15 km",   zone:"Zone 2",km:15}]},
-
-  // ── FUNDERING (W9–18) ─────────────────────────────────────────────────────
   { gw:9,  fase:"Fundering", fw:1,  label:"Aerobe basis",       type:"build", totalKm:28,
     sessions:[{dag:"Ma",type:"Easy run",  dist:"5 km",          zone:"Z1–2",  km:5},
               {dag:"Wo",type:"Steady run",dist:"6 km",          zone:"Z2",    km:6},
@@ -115,8 +112,6 @@ const ALL_WEEKS = [
               {dag:"Wo",type:"Tempo",     dist:"12 km (4 Z3)",  zone:"Z3",    km:12},
               {dag:"Vr",type:"Interval",  dist:"5×1 km",        zone:"Z4",    km:null},
               {dag:"Zo",type:"Long run",  dist:"26 km",         zone:"Z2–3",  km:26}]},
-
-  // ── TRANSITIE (W19–22) ───────────────────────────────────────────────────
   { gw:19, fase:"Transitie", fw:1, label:"Herstel & onderhoud", type:"rest",  totalKm:28,
     sessions:[{dag:"Di",type:"Easy run",     dist:"8 km",         zone:"Z1–Z2", km:8,  toelichting:"Rustig starten, herstelgericht"},
               {dag:"Do",type:"Easy + strides",dist:"6 km + 4×20s",zone:"Z1–Z2",km:6,  toelichting:"Souplesse, geen vermoeidheid"},
@@ -133,8 +128,6 @@ const ALL_WEEKS = [
     sessions:[{dag:"Di",type:"Steady run",   dist:"12 km",        zone:"Z2–lage Z3",km:12,toelichting:"Brug naar marathonspecifiek"},
               {dag:"Do",type:"Easy + strides",dist:"8 km + 4×20s",zone:"Z1–Z2", km:8, toelichting:"Souplesse"},
               {dag:"Za",type:"Long run",      dist:"20 km",        zone:"Z2",   km:20, toelichting:"Fris eindigen"}]},
-
-  // ── MARATHONSPECIFIEK (W23–34) ───────────────────────────────────────────
   { gw:23, fase:"Marathonspecifiek", fw:1,  label:"Intro marathontempo",      type:"build", totalKm:50,
     sessions:[{dag:"Di",type:"Tempo",   dist:"12 km (2×3)", zone:"Z3",    km:12, toelichting:"Intro marathontempo"},
               {dag:"Do",type:"Easy",    dist:"8 km",        zone:"Z1–Z2", km:8,  toelichting:"Herstel"},
@@ -197,8 +190,6 @@ const ALL_WEEKS = [
               {dag:"Zo",type:"MARATHON",    dist:"42.2 km",     zone:"Z2–Z3",km:42.2, toelichting:"Wedstrijd 🏁"}]},
 ];
 
-// ─── PHASE META ──────────────────────────────────────────────────────────────
-
 const PHASE_META = {
   "Basis":            { color:"#64748b", bg:"#f8fafc",  border:"#e2e8f0", range:[1,8]  },
   "Fundering":        { color:"#0f172a", bg:"#f1f5f9",  border:"#cbd5e1", range:[9,18] },
@@ -214,7 +205,15 @@ const TYPE_META = {
   race:  { label:"wedstrijd", color:"#dc2626", bg:"#fef2f2" },
 };
 
-// ─── CHART DATA ──────────────────────────────────────────────────────────────
+function useWindowWidth() {
+  const [width, setWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 800);
+  useEffect(() => {
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return width;
+}
 
 function makeChart(selGw) {
   return ALL_WEEKS.map(w => {
@@ -231,14 +230,12 @@ function makeChart(selGw) {
   });
 }
 
-// ─── COMPONENTS ──────────────────────────────────────────────────────────────
-
 function KpiCard({ label, value, sub, accent }) {
   return (
-    <div style={{ background: accent ? "#0f172a" : "#fff", border: accent ? "none" : "1px solid #e2e8f0", borderRadius: 12, padding: "16px 20px", display:"flex", flexDirection:"column", gap:3 }}>
-      <span style={{ fontSize:10, fontWeight:700, letterSpacing:"0.09em", color:"#64748b", textTransform:"uppercase" }}>{label}</span>
-      <span style={{ fontSize:23, fontWeight:700, color: accent ? "#fff" : "#0f172a", letterSpacing:"-0.02em", lineHeight:1.1 }}>{value}</span>
-      {sub && <span style={{ fontSize:11, color:"#94a3b8", marginTop:1 }}>{sub}</span>}
+    <div style={{ background: accent ? "#0f172a" : "#fff", border: accent ? "none" : "1px solid #e2e8f0", borderRadius: 12, padding: "14px 16px", display:"flex", flexDirection:"column", gap:3 }}>
+      <span style={{ fontSize:10, fontWeight:700, letterSpacing:"0.09em", color: accent ? "#94a3b8" : "#64748b", textTransform:"uppercase" }}>{label}</span>
+      <span style={{ fontSize:21, fontWeight:700, color: accent ? "#fff" : "#0f172a", letterSpacing:"-0.02em", lineHeight:1.1 }}>{value}</span>
+      {sub && <span style={{ fontSize:11, color: accent ? "#64748b" : "#94a3b8", marginTop:1 }}>{sub}</span>}
     </div>
   );
 }
@@ -285,10 +282,11 @@ const CustomTooltip = ({ active, payload }) => {
   );
 };
 
-// ─── MAIN ────────────────────────────────────────────────────────────────────
-
 export default function MarathonDashboard() {
   const [sel, setSel] = useState(REAL_NOW);
+  const width = useWindowWidth();
+  const isMobile = width < 640;
+  const px = isMobile ? 16 : 28;
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -305,18 +303,17 @@ export default function MarathonDashboard() {
   const chart    = makeChart(sel);
   const longRun  = wd.sessions.find(s => ["Long run","Duur","MARATHON"].includes(s.type));
   const refColor = isNow ? "#dc2626" : isFut ? "#3b82f6" : "#f97316";
-
-  // Next 3 weeks (across phase boundary)
   const nextWeeks = ALL_WEEKS.slice(sel, Math.min(sel + 3, 34));
 
   const NavBtn = ({ dir }) => {
     const disabled = dir === -1 ? sel === 1 : sel === 34;
     return (
       <button onClick={() => setSel(s => s + dir)} disabled={disabled}
-        style={{ width:32, height:32, borderRadius:8, border:"1px solid #e2e8f0",
+        style={{ width:36, height:36, borderRadius:8, border:"1px solid #e2e8f0",
           background: disabled ? "#f8fafc" : "#fff", cursor: disabled ? "not-allowed" : "pointer",
           display:"flex", alignItems:"center", justifyContent:"center",
-          color: disabled ? "#cbd5e1" : "#0f172a", fontSize:18, transition:"all 0.15s" }}
+          color: disabled ? "#cbd5e1" : "#0f172a", fontSize:20, transition:"all 0.15s",
+          flexShrink:0 }}
       >{dir === -1 ? "‹" : "›"}</button>
     );
   };
@@ -325,9 +322,9 @@ export default function MarathonDashboard() {
     <div style={{ fontFamily:"'DM Sans', system-ui, sans-serif", background:"#fff", minHeight:"100vh" }}>
 
       {/* TOP BAR */}
-      <div style={{ borderBottom:"1px solid #e2e8f0", padding:"13px 28px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+      <div style={{ borderBottom:"1px solid #e2e8f0", padding: isMobile ? "12px 16px" : "13px 28px", display:"flex", flexDirection: isMobile ? "column" : "row", justifyContent:"space-between", alignItems: isMobile ? "flex-start" : "center", gap: isMobile ? 10 : 0 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ width:30, height:30, borderRadius:8, background:"#0f172a", display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ width:30, height:30, borderRadius:8, background:"#0f172a", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           </div>
           <div>
@@ -335,19 +332,22 @@ export default function MarathonDashboard() {
             <div style={{ fontSize:10, color:"#94a3b8" }}>Rotterdam · 12 april 2026</div>
           </div>
         </div>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ textAlign:"right" }}>
-            <div style={{ fontSize:10, fontWeight:700, color:"#94a3b8", textTransform:"uppercase", letterSpacing:"0.06em" }}>Huidige positie</div>
-            <div style={{ fontSize:12, fontWeight:600, color:"#0f172a" }}>Marathonspecifiek — Week 3 van 12</div>
-          </div>
-          <div style={{ background:"#fee2e2", color:"#dc2626", borderRadius:8, padding:"5px 12px", fontSize:13, fontWeight:700, fontFamily:"DM Mono, monospace" }}>30 dgn</div>
+        <div style={{ display:"flex", alignItems:"center", gap:10, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "space-between" : "flex-end" }}>
+          {!isMobile && (
+            <div style={{ textAlign:"right" }}>
+              <div style={{ fontSize:10, fontWeight:700, color:"#94a3b8", textTransform:"uppercase", letterSpacing:"0.06em" }}>Huidige positie</div>
+              <div style={{ fontSize:12, fontWeight:600, color:"#0f172a" }}>Marathonspecifiek — Week 3 van 12</div>
+            </div>
+          )}
+          {isMobile && <div style={{ fontSize:12, fontWeight:600, color:"#0f172a" }}>MS Week 3/12</div>}
+          <div style={{ background:"#fee2e2", color:"#dc2626", borderRadius:8, padding:"5px 12px", fontSize:13, fontWeight:700, fontFamily:"DM Mono, monospace", flexShrink:0 }}>30 dgn</div>
         </div>
       </div>
 
       {/* PHASE PROGRESS BAR */}
-      <div style={{ padding:"14px 28px 0", borderBottom:"1px solid #f1f5f9" }}>
+      <div style={{ padding:`14px ${px}px 0`, borderBottom:"1px solid #f1f5f9" }}>
         <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:7 }}>
-          Programma · globale week {sel} van 34 geselecteerd
+          Programma · week {sel}/34
         </div>
         <div style={{ display:"flex", gap:3, height:4, borderRadius:6, overflow:"hidden", marginBottom:8 }}>
           {[{name:"Basis",w:8},{name:"Fundering",w:10},{name:"Transitie",w:4},{name:"Marathonspecifiek",w:12}].map((p,i) => {
@@ -364,13 +364,13 @@ export default function MarathonDashboard() {
           })}
         </div>
         <div style={{ display:"flex", gap:3, marginBottom:14 }}>
-          {[{name:"Basis",period:"sep–okt",w:8},{name:"Fundering",period:"nov–jan",w:10},{name:"Transitie",period:"feb",w:4},{name:"Marathonspecifiek",period:"mrt–apr",w:12}].map(p => {
+          {[{name:"Basis",period:"sep–okt",short:"Basis",w:8},{name:"Fundering",period:"nov–jan",short:"Fund.",w:10},{name:"Transitie",period:"feb",short:"Trans.",w:4},{name:"Marathonspecifiek",period:"mrt–apr",short:"MS",w:12}].map(p => {
             const pm2 = PHASE_META[p.name];
             const isActive = wd.fase === p.name;
             return (
-              <div key={p.name} style={{ width:`${(p.w/34)*100}%` }}>
-                <div style={{ fontSize:10, fontWeight: isActive ? 700 : 500, color: isActive ? pm2.color : "#94a3b8" }}>{p.name}</div>
-                <div style={{ fontSize:9, color:"#cbd5e1", fontFamily:"DM Mono, monospace" }}>{p.period}</div>
+              <div key={p.name} style={{ width:`${(p.w/34)*100}%`, overflow:"hidden" }}>
+                <div style={{ fontSize: isMobile ? 9 : 10, fontWeight: isActive ? 700 : 500, color: isActive ? pm2.color : "#94a3b8", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{isMobile ? p.short : p.name}</div>
+                {!isMobile && <div style={{ fontSize:9, color:"#cbd5e1", fontFamily:"DM Mono, monospace" }}>{p.period}</div>}
               </div>
             );
           })}
@@ -378,35 +378,34 @@ export default function MarathonDashboard() {
       </div>
 
       {/* WEEK NAVIGATOR */}
-      <div style={{ padding:"12px 28px", borderBottom:"1px solid #f1f5f9" }}>
+      <div style={{ padding:`12px ${px}px`, borderBottom:"1px solid #f1f5f9" }}>
         {/* Phase tabs */}
-        <div style={{ display:"flex", gap:4, marginBottom:10 }}>
+        <div style={{ display:"flex", gap:4, marginBottom:10, overflowX:"auto", WebkitOverflowScrolling:"touch", scrollbarWidth:"none" }}>
           {Object.entries(PHASE_META).map(([name, meta]) => {
-            const [start, end] = meta.range;
+            const [start] = meta.range;
             const isActive = wd.fase === name;
+            const shortNames = { "Basis":"Basis", "Fundering":"Fund.", "Transitie":"Trans.", "Marathonspecifiek":"MS" };
             return (
               <button key={name} onClick={() => setSel(start)}
-                style={{ padding:"5px 12px", borderRadius:6, border:"1px solid",
+                style={{ padding: isMobile ? "5px 10px" : "5px 12px", borderRadius:6, border:"1px solid",
                   borderColor: isActive ? meta.color : "#e2e8f0",
                   background: isActive ? meta.bg : "#fff",
                   color: isActive ? meta.color : "#94a3b8",
                   fontSize:11, fontWeight: isActive ? 700 : 500, cursor:"pointer",
-                  transition:"all 0.15s" }}
-              >{name}</button>
+                  transition:"all 0.15s", whiteSpace:"nowrap", flexShrink:0 }}
+              >{isMobile ? shortNames[name] : name}</button>
             );
           })}
         </div>
 
-        {/* Week pills for current phase */}
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+        {/* Week selector row */}
+        <div style={{ display:"flex", alignItems:"center", gap: isMobile ? 8 : 10, justifyContent:"space-between", flexWrap: isMobile ? "wrap" : "nowrap" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, flex: isMobile ? "1 1 100%" : "0 0 auto", justifyContent: isMobile ? "space-between" : "flex-start" }}>
             <NavBtn dir={-1} />
-            <div style={{ textAlign:"center", minWidth:220 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:7, justifyContent:"center" }}>
-                <span style={{ fontSize:17, fontWeight:700, color:"#0f172a" }}>
-                  {wd.fase === "Marathonspecifiek" || wd.fase === "Transitie"
-                    ? `${wd.fase === "Marathonspecifiek" ? "MS" : "Transitie"} Week ${wd.fw}`
-                    : `${wd.fase} Week ${wd.fw}`}
+            <div style={{ textAlign:"center", flex:1 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:6, justifyContent:"center", flexWrap:"wrap" }}>
+                <span style={{ fontSize: isMobile ? 15 : 17, fontWeight:700, color:"#0f172a" }}>
+                  {wd.fase === "Marathonspecifiek" ? `MS Week ${wd.fw}` : wd.fase === "Transitie" ? `Transitie W${wd.fw}` : `${wd.fase} Week ${wd.fw}`}
                 </span>
                 <span style={{ fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:4, background:tm.bg, color:tm.color, fontFamily:"DM Mono, monospace" }}>{tm.label}</span>
                 {isNow && <span style={{ fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:4, background:"#0f172a", color:"#fff", letterSpacing:"0.04em" }}>NU</span>}
@@ -418,8 +417,8 @@ export default function MarathonDashboard() {
             <NavBtn dir={1} />
           </div>
 
-          {/* Pills for current phase only */}
-          <div style={{ display:"flex", gap:3, flexWrap:"wrap", maxWidth:340 }}>
+          {/* Week pills */}
+          <div style={{ display:"flex", gap:3, flexWrap:"wrap", maxWidth: isMobile ? "100%" : 340, flex: isMobile ? "1 1 100%" : "0 0 auto" }}>
             {ALL_WEEKS.filter(w => w.fase === wd.fase).map(w => {
               const isSel = w.gw === sel;
               const isCur = w.gw === REAL_NOW;
@@ -428,7 +427,7 @@ export default function MarathonDashboard() {
               return (
                 <button key={w.gw} onClick={() => setSel(w.gw)}
                   title={`Week ${w.fw} · ${w.label}`}
-                  style={{ width:26, height:26, borderRadius:6,
+                  style={{ width:28, height:28, borderRadius:6,
                     border: isCur && !isSel ? `2px solid ${wpm.color}` : "1px solid transparent",
                     background: isSel ? "#0f172a" : w.gw < REAL_NOW ? "#f1f5f9" : wtm.bg,
                     color: isSel ? "#fff" : w.gw < REAL_NOW ? "#94a3b8" : wtm.color,
@@ -442,22 +441,22 @@ export default function MarathonDashboard() {
       </div>
 
       {/* KPI ROW */}
-      <div style={{ padding:"14px 28px", display:"grid", gridTemplateColumns:"1fr 1fr 1fr 1fr", gap:10 }}>
+      <div style={{ padding:`14px ${px}px`, display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr 1fr", gap:10 }}>
         <KpiCard label="Week volume" value={`${wd.totalKm} km`} sub="Geplande km" accent />
-        <KpiCard label="Long run / race" value={longRun ? `${longRun.km ?? longRun.dist}${longRun.km ? " km" : ""}` : "–"} sub={longRun?.toelichting?.split("·")[0] || longRun?.dist} />
-        <KpiCard label={`Week in ${wd.fase === "Marathonspecifiek" ? "MS-blok" : wd.fase}`} value={`${wd.fw} / ${[8,10,4,12][["Basis","Fundering","Transitie","Marathonspecifiek"].indexOf(wd.fase)]}`} sub={wd.fase} />
+        <KpiCard label="Long run" value={longRun ? `${longRun.km ?? longRun.dist}${longRun.km ? " km" : ""}` : "–"} sub={longRun?.toelichting?.split("·")[0] || longRun?.dist} />
+        <KpiCard label={`Week in ${wd.fase === "Marathonspecifiek" ? "MS" : wd.fase}`} value={`${wd.fw} / ${[8,10,4,12][["Basis","Fundering","Transitie","Marathonspecifiek"].indexOf(wd.fase)]}`} sub={wd.fase} />
         <KpiCard label="Bloktype" value={tm.label} sub={wd.label} />
       </div>
 
       {/* SESSIONS + UPCOMING */}
-      <div style={{ padding:"0 28px 18px", display:"grid", gridTemplateColumns:"1.3fr 1fr", gap:18 }}>
+      <div style={{ padding:`0 ${px}px 18px`, display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1.3fr 1fr", gap:18 }}>
         <div>
           <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
             <span style={{ fontSize:12, fontWeight:700, color:"#0f172a" }}>Trainingen</span>
-            <span style={{ fontSize:11, padding:"2px 8px", borderRadius:4, background:pm.bg, color:pm.color, border:`1px solid ${pm.border}`, fontWeight:600, fontSize:10 }}>{wd.fase}</span>
+            <span style={{ fontSize:10, padding:"2px 8px", borderRadius:4, background:pm.bg, color:pm.color, border:`1px solid ${pm.border}`, fontWeight:600 }}>{wd.fase}</span>
             {isNow && <span style={{ fontSize:10, fontWeight:700, padding:"2px 6px", borderRadius:4, background:"#dcfce7", color:"#16a34a" }}>LOPEND</span>}
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+          <div style={{ display:"grid", gridTemplateColumns: isMobile && wd.sessions.length <= 3 ? "1fr" : "1fr 1fr", gap:8 }}>
             {wd.sessions.map(s => <SessionCard key={s.dag} {...s} />)}
           </div>
         </div>
@@ -484,15 +483,15 @@ export default function MarathonDashboard() {
                       onClick={() => setSel(w.gw)}
                       onMouseEnter={e => e.currentTarget.style.background="#f8fafc"}
                       onMouseLeave={e => e.currentTarget.style.background=""}>
-                      <div>
-                        <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:2 }}>
+                      <div style={{ minWidth:0, flex:1 }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:2, flexWrap:"wrap" }}>
                           <span style={{ fontSize:10, fontWeight:700, color:"#94a3b8", fontFamily:"DM Mono, monospace" }}>W{w.fw}</span>
                           <span style={{ fontSize:11, fontWeight:600, color:"#0f172a" }}>{w.label}</span>
                           <span style={{ fontSize:9, fontWeight:700, padding:"1px 5px", borderRadius:3, background:wtm.bg, color:wtm.color }}>{wtm.label}</span>
                         </div>
-                        <div style={{ fontSize:10, color:"#94a3b8" }}>{w.sessions.map(s => `${s.type} ${s.km != null ? s.km+"km" : s.dist}`).join(" · ")}</div>
+                        <div style={{ fontSize:10, color:"#94a3b8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{w.sessions.map(s => `${s.type} ${s.km != null ? s.km+"km" : s.dist}`).join(" · ")}</div>
                       </div>
-                      <div style={{ textAlign:"right" }}>
+                      <div style={{ textAlign:"right", flexShrink:0, marginLeft:8 }}>
                         <div style={{ fontSize:15, fontWeight:700, color:"#0f172a", fontFamily:"DM Mono, monospace" }}>{w.totalKm}</div>
                         <div style={{ fontSize:9, color:"#94a3b8" }}>km</div>
                       </div>
@@ -512,14 +511,14 @@ export default function MarathonDashboard() {
       </div>
 
       {/* CHART */}
-      <div style={{ padding:"0 28px 28px" }}>
+      <div style={{ padding:`0 ${px}px 28px` }}>
         <div style={{ border:"1px solid #e2e8f0", borderRadius:12, overflow:"hidden" }}>
-          <div style={{ padding:"16px 22px 0", display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+          <div style={{ padding:`16px ${isMobile ? 14 : 22}px 0`, display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:8 }}>
             <div>
-              <div style={{ fontSize:12, fontWeight:700, color:"#0f172a" }}>Long run progressie · alle 34 weken</div>
-              <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>Klik op een punt om direct naar die week te springen</div>
+              <div style={{ fontSize:12, fontWeight:700, color:"#0f172a" }}>Long run progressie · 34 weken</div>
+              {!isMobile && <div style={{ fontSize:10, color:"#94a3b8", marginTop:1 }}>Klik op een punt om naar die week te springen</div>}
             </div>
-            <div style={{ display:"flex", gap:12 }}>
+            <div style={{ display:"flex", gap: isMobile ? 8 : 12, flexWrap:"wrap" }}>
               {[["#0f172a","Afgerond"],["#93c5fd","Gepland"],["#f97316","Geselecteerd"]].map(([c,l]) => (
                 <div key={l} style={{ display:"flex", alignItems:"center", gap:4 }}>
                   <div style={{ width:8, height:8, borderRadius:"50%", background:c }} />
@@ -528,9 +527,9 @@ export default function MarathonDashboard() {
               ))}
             </div>
           </div>
-          <div style={{ height:210, padding:"10px 10px 0" }}>
+          <div style={{ height: isMobile ? 160 : 210, padding:"10px 4px 0" }}>
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chart} margin={{ top:8, right:14, left:-20, bottom:0 }}
+              <AreaChart data={chart} margin={{ top:8, right:8, left: isMobile ? -28 : -20, bottom:0 }}
                 onClick={e => { if (e?.activePayload?.[0]) setSel(e.activePayload[0].payload.week); }}>
                 <defs>
                   <linearGradient id="gD" x1="0" y1="0" x2="0" y2="1">
@@ -547,7 +546,7 @@ export default function MarathonDashboard() {
                 <ReferenceArea x1={19} x2={22} fill="#fff7ed" fillOpacity={0.5}/>
                 <ReferenceArea x1={23} x2={34} fill="#eff6ff" fillOpacity={0.4}/>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false}/>
-                <XAxis dataKey="week" tick={{ fontSize:9, fill:"#94a3b8", fontFamily:"DM Mono, monospace" }} axisLine={false} tickLine={false} interval={3}/>
+                <XAxis dataKey="week" tick={{ fontSize:9, fill:"#94a3b8", fontFamily:"DM Mono, monospace" }} axisLine={false} tickLine={false} interval={isMobile ? 7 : 3}/>
                 <YAxis tick={{ fontSize:9, fill:"#94a3b8", fontFamily:"DM Mono, monospace" }} axisLine={false} tickLine={false}/>
                 <Tooltip content={<CustomTooltip />}/>
                 {[8.5,18.5,22.5].map(at => <ReferenceLine key={at} x={at} stroke="#e2e8f0" strokeWidth={1.5} strokeDasharray="4 2"/>)}
@@ -569,18 +568,18 @@ export default function MarathonDashboard() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"8fr 10fr 4fr 12fr", padding:"5px 26px 12px" }}>
-            {[["Basis","#64748b"],["Fundering","#0f172a"],["Transitie","#c2410c"],["Marathonspecifiek","#1d4ed8"]].map(([n,c]) => (
-              <div key={n} style={{ textAlign:"center", fontSize:9, fontWeight:700, color:c, letterSpacing:"0.04em", textTransform:"uppercase" }}>{n}</div>
+          <div style={{ display:"grid", gridTemplateColumns:"8fr 10fr 4fr 12fr", padding:`5px ${isMobile ? 10 : 26}px 12px` }}>
+            {[["Basis","#64748b"],["Fundering","#0f172a"],["Trans.","#c2410c"],["MS","#1d4ed8"]].map(([n,c]) => (
+              <div key={n} style={{ textAlign:"center", fontSize: isMobile ? 8 : 9, fontWeight:700, color:c, letterSpacing:"0.04em", textTransform:"uppercase" }}>{n}</div>
             ))}
           </div>
         </div>
       </div>
 
       {/* FOOTER */}
-      <div style={{ borderTop:"1px solid #f1f5f9", padding:"10px 28px", display:"flex", justifyContent:"space-between" }}>
-        <span style={{ fontSize:10, color:"#cbd5e1" }}>Trainingsprogramma Marathon Rotterdam · april 2026</span>
-        <span style={{ fontSize:10, fontFamily:"DM Mono, monospace", color:"#cbd5e1" }}>globale week {sel}/34 · {wd.fase} W{wd.fw}</span>
+      <div style={{ borderTop:"1px solid #f1f5f9", padding:`10px ${px}px`, display:"flex", justifyContent:"space-between", flexWrap:"wrap", gap:4 }}>
+        <span style={{ fontSize:10, color:"#cbd5e1" }}>Marathon Rotterdam · april 2026</span>
+        <span style={{ fontSize:10, fontFamily:"DM Mono, monospace", color:"#cbd5e1" }}>week {sel}/34 · {wd.fase} W{wd.fw}</span>
       </div>
     </div>
   );
